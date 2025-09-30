@@ -41,7 +41,11 @@ Telegram sends formatted leads back to the user
 ##Example Output
 
 Name: cloud9.gym
+
 Username: cloud9.gym
+
 Instagram handle: https://www.instagram.com/cloud9.gym/
+
 Description: Managed by @digijarindia Gym|Cardio|Zumba|Yoga/Power Yoga|Steam|Dance|Functional Training|Diet|GroupX 📍Malad/Chembur/Dadar/Sion/Mahim/Andheri/Mulund
+
 Followers: 9,700
