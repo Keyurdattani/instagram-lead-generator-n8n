@@ -28,9 +28,9 @@ It integrates Telegram, AI-powered query handling (OpenAI), Apify Instagram scra
 
 ## Example Workflow
 
-User on Telegram → "Get me salons in Delhi"
+User on Telegram → "Get me Gyms in Mumbai"
 ↓
-AI Agent (OpenAI GPT) parses → { lead_type: "salon", location: "Delhi" }
+AI Agent (OpenAI GPT) parses → { lead_type: "Gyms", location: "Mumbai" }
 ↓
 Instagram_scrapper workflow runs → Scrapes data from Apify
 ↓
