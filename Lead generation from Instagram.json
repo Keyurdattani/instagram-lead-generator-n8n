@@ -1,0 +1,235 @@
+{
+  "name": "Lead generation from Instagram",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        144,
+        -208
+      ],
+      "id": "7076a931-1287-4a06-8ae9-b4f97a91bb2f",
+      "name": "Telegram Trigger",
+      "webhookId": "674f3038-0cc8-4ed7-baef-7827b70c36bf",
+      "credentials": {
+        "telegramApi": {
+          "id": "9rSEfz46yazoiRuf",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}",
+        "options": {
+          "systemMessage": "={\n  \"role\": \"system\",\n  \"content\": \"You are an AI Assistant that responds to Telegram user messages and manages Instagram lead generation with the Instagram Scraper tool.\\n\\n## Behavior Rules\\n\\n1. Generic Queries:\\n- If the user asks for generic information (not related to lead generation), provide a clear and helpful response directly.\\n- Keep answers concise, friendly, and informative.\\n\\n2. Lead Generation Queries:\\n- If the user requests Instagram leads, first confirm the required details:\\n  - Lead Type (e.g., gyms, salons, real estate, fitness trainers, etc.)\\n  - Location (e.g., Mumbai, Delhi, New York, etc.)\\n- If the user provides incomplete information, ask follow-up questions until both lead type and location are specified.\\n\\n3. Scraper Tool Usage:\\n- Once both lead type and location are available, call the Instagram Scraper tool with the following format:\\n{\\n  \\\"lead_type\\\": \\\"<lead_type>\\\",\\n  \\\"location\\\": \\\"<location>\\\"\\n}\\n\\n4. Response Formatting:\\n- After retrieving leads, format the Telegram message for each lead using HTML tags and newline characters:\\n\\n<b>Name:</b> <name>\\n<b>Username:</b> <username>\\n<b>Instagram handle:</b> <url>\\n<b>Description:</b> <bio/description>\\n<b>Followers:</b> <followers>\\n\\n- If multiple leads are generated, separate each lead with two newline characters (\\\\n\\\\n).\\n\\n5. Politeness & Clarity:\\n- Always confirm when a task is completed (e.g., \\\"Here are the leads you requested for gyms in Mumbai\\\").\\n- If no leads are found, reply with:\\n\\\"No leads found for <lead_type> in <location>. Please try a different search.\\\"\"\n}\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        432,
+        -208
+      ],
+      "id": "1d85d6db-aa5e-41bf-aad5-085effe2c929",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "description": "If the user is asking to generate leads using the Instagram then you need to call this tool",
+        "workflowId": {
+          "__rl": true,
+          "value": "0mq5ybZ51iqMZX9G",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/0mq5ybZ51iqMZX9G",
+          "cachedResultName": "Instagram_scrapper"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "lead_type": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('lead_type', `“lead_type”:\n“string — the type of business or person you want leads for (e.g., ‘gym’, ‘restaurant’, ‘salon’, ‘influencer’, or a specific brand name).”\n\nThat tells the AI Agent: “populate lead_type with a concise business category or proper name of the entity you want Instagram leads for.”`, 'string') }}",
+            "location": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('location', `“location”:\n“string — the geographic area to search for leads, such as a city, neighborhood, or region (e.g., ‘Mumbai’, ‘Bandra, Mumbai’, ‘South Delhi’).”`, 'string') }}",
+            "filters": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('filters', `\"Optional string — additional criteria to refine the lead search, such as follower count thresholds (e.g., '>10K followers'), verification status, business type specifics, or any other qualifiers that help narrow down the results.\"`, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "lead_type",
+              "displayName": "lead_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "location",
+              "displayName": "location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "filters",
+              "displayName": "filters",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        624,
+        16
+      ],
+      "id": "88260a4a-e330-4b6b-a78c-01ad5e2055fa",
+      "name": "Call 'Instagram_scrapper'"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.message.chat.id }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        464,
+        16
+      ],
+      "id": "50d30680-a1a1-4280-853e-8ad24d1cb070",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        320,
+        16
+      ],
+      "id": "0b2e9802-aaaf-4599-a44d-ceb5ed1fad92",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "a7tGLrlEBpyjkFy8",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        832,
+        -208
+      ],
+      "id": "a24851f7-ec51-414f-bd77-542729711c57",
+      "name": "Send a text message",
+      "webhookId": "5cea0d67-405e-4a06-af7d-95dcaa776174",
+      "credentials": {
+        "telegramApi": {
+          "id": "9rSEfz46yazoiRuf",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'Instagram_scrapper'": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "9403e0bb-d88a-488d-8aeb-1d7889d19a2d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "82b6441211fd9822eec304634ebbf16aa2a53238163d23724d50712f35c4f381"
+  },
+  "id": "6wnYvGcnFhntIhKt",
+  "tags": []
+}

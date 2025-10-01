@@ -1,0 +1,223 @@
+{
+  "name": "Instagram_scrapper",
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/apify~google-search-scraper/run-sync-get-dataset-items?token=<Insert your API Key>",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"focusOnPaidAds\": false,\n    \"forceExactMatch\": false,\n    \"includeIcons\": false,\n    \"includeUnfilteredResults\": false,\n    \"maxPagesPerQuery\": 1,\n    \"maximumLeadsEnrichmentRecords\": 0,\n    \"mobileResults\": false,\n    \"queries\": \"site:instagram.com + {{ $json.lead_type }} {{ $json.location }}\",\n    \"resultsPerPage\": 100,\n    \"saveHtml\": false,\n    \"saveHtmlToKeyValueStore\": true\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        112,
+        -112
+      ],
+      "id": "19ae4340-8a87-4f46-9fa4-c25989b07efb",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        320,
+        -112
+      ],
+      "id": "f457bf5c-b1ba-463b-aa10-bbe33cfe055d",
+      "name": "Wait",
+      "webhookId": "653423e9-2ac3-47d7-bed9-f68af03405b7"
+    },
+    {
+      "parameters": {
+        "jsCode": "const output = [];\n\n// Helper function to convert followers like \"1.3K+\" into numbers\nfunction parseFollowers(followersText) {\n  if (!followersText) return null;\n\n  let num = followersText.replace(/[^\\d\\.KkMm]/g, \"\"); // Keep numbers + K/M\n  if (num.toLowerCase().includes(\"k\")) {\n    return Math.round(parseFloat(num) * 1000);\n  } else if (num.toLowerCase().includes(\"m\")) {\n    return Math.round(parseFloat(num) * 1000000);\n  } else {\n    return parseInt(num, 10) || null;\n  }\n}\n\nfor (const item of items) {\n  const results = item.json.organicResults || [];\n\n  for (const r of results) {\n    let username = \"\";\n\n    // Extract @username from URL\n    if (r.url) {\n      const uMatch = r.url.match(/instagram\\.com\\/([^\\/?#]+)/i);\n      if (uMatch) username = uMatch[1];\n    }\n\n    output.push({\n      json: {\n        Name: r.title || \"\",\n        Username: username,\n        InstagramURL: r.url || \"\",\n        Description: r.description || \"\",\n        Followers: parseFollowers(r.followersAmount),\n        RawFollowersText: r.followersAmount || \"\",\n        SearchTerm: item.json.searchQuery?.term || \"\",\n        SourcePageURL: item.json.url || \"\"\n      }\n    });\n  }\n}\n\nreturn output;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        528,
+        -112
+      ],
+      "id": "aaef4580-3f5a-42b3-8ffd-6e85ba4e8ba6",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appY7LkEkJ9b4CO0p",
+          "mode": "list",
+          "cachedResultName": "Instagram Leads",
+          "cachedResultUrl": "https://airtable.com/appY7LkEkJ9b4CO0p"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblojdab8XUSub4OV",
+          "mode": "list",
+          "cachedResultName": "Gyms",
+          "cachedResultUrl": "https://airtable.com/appY7LkEkJ9b4CO0p/tblojdab8XUSub4OV"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $json.Name }}",
+            "Username": "={{ $json.Username }}",
+            "Instagram handle": "={{ $json.InstagramURL }}",
+            "Description": "={{ $json.Description }}",
+            "Followers": "={{ $json.Followers }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Username",
+              "displayName": "Username",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Instagram handle",
+              "displayName": "Instagram handle",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Description",
+              "displayName": "Description",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Followers",
+              "displayName": "Followers",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        736,
+        -112
+      ],
+      "id": "32ba8854-d17d-4941-9731-e49c02288d68",
+      "name": "Create a record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "4igJtcvhO0FMrlVN",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "inputSource": "jsonExample",
+        "jsonExample": "{\n  \"lead_type\": null,\n  \"location\": null,\n  \"filters\": null\n}\n"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -128,
+        -112
+      ],
+      "id": "3e952f96-f0f1-4d29-8d34-ec50440fa5a8",
+      "name": "When Executed by Another Workflow"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Create a record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "015a4529-b9fa-4638-bbe2-a2eada54a177",
+  "meta": {
+    "instanceId": "82b6441211fd9822eec304634ebbf16aa2a53238163d23724d50712f35c4f381"
+  },
+  "id": "0mq5ybZ51iqMZX9G",
+  "tags": []
+}
